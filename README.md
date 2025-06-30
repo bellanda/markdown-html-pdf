@@ -72,7 +72,7 @@ asyncio.run(convert())
 
 ## Requirements
 
-- Python 3.12+
+- Python 3.9+
 - Playwright (automatically installed)
 
 ## How it works
