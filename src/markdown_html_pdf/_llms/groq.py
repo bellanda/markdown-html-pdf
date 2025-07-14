@@ -6,7 +6,8 @@ from groq import Groq
 
 from markdown_html_pdf._constants import api_keys
 
-client = Groq(api_key=api_keys.GROQ_API_KEY)
+if api_keys.GROQ_API_KEY:
+    client = Groq(api_key=api_keys.GROQ_API_KEY)
 
 
 class GroqLLMs:
