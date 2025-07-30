@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Tuple
 import fitz
 
 from markdown_html_pdf._constants import paths
-from markdown_html_pdf._llms.groq import GroqLLMs, call_groq_llm
+from markdown_html_pdf._llms.fallback_llm import call_llm_with_fallback_robust
 
 
 def extract_page_links(page: fitz.Page) -> List[Dict[str, Any]]:
@@ -361,7 +361,7 @@ def pdf_to_pixmaps_bytes(pdf_path: pathlib.Path, dpi: int = 150) -> List[bytes]:
 
 def process_page_image(page_data: Tuple[int, bytes, str]) -> Tuple[int, str]:
     """
-    Process a single page image with LLM.
+    Process a single page image with LLM using fallback providers.
 
     Args:
         page_data: Tuple of (page_number, image_bytes, prompt)
@@ -372,11 +372,13 @@ def process_page_image(page_data: Tuple[int, bytes, str]) -> Tuple[int, str]:
     page_number, image_bytes, prompt = page_data
 
     try:
-        result = call_groq_llm(
-            GroqLLMs.llama_4_scout_17b_16e_instruct,
-            prompt,
+        result = call_llm_with_fallback_robust(
+            prompt=prompt,
             images=[image_bytes],
             max_tokens=4096,  # Increase token limit for detailed analysis
+            temperature=0.2,
+            retry_delay=1,  # 1 second delay between attempts
+            max_retries_per_provider=2,  # Try each provider twice before moving to next
         )
         return (page_number, result)
     except Exception as e:
