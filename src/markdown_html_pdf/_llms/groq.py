@@ -6,11 +6,13 @@ from groq import Groq
 
 from markdown_html_pdf._constants import api_keys
 
-if api_keys.GROQ_API_KEY:
-    client = Groq(api_key=api_keys.GROQ_API_KEY)
+client = Groq(api_key=api_keys.GROQ_API_KEY)
 
 
 class GroqLLMs:
+    # OpenAI models
+    gpt_oss_120b = "openai/gpt-oss-120b"
+    gpt_oss_20b = "openai/gpt-oss-20b"
     # Llama 4
     llama_4_maverick_17b_128e_instruct = "meta-llama/llama-4-maverick-17b-128e-instruct"
     llama_4_scout_17b_16e_instruct = "meta-llama/llama-4-scout-17b-16e-instruct"
@@ -21,9 +23,6 @@ class GroqLLMs:
     whisper_large_v3 = "whisper-large-v3"
     whisper_large_v3_turbo = "whisper-large-v3-turbo"
     distil_whisper_large_v3_en = "distil-whisper-large-v3-en"
-    # Alibaba Qwen
-    qwen_3_32b = "qwen/qwen3-32b"
-    qwen_qwq_32b = "qwen/qwen-qwq-32b"
 
 
 def call_groq_llm(
@@ -34,9 +33,11 @@ def call_groq_llm(
     top_p: float = 1,
     stop: str = None,
     images: Optional[List[Union[str, bytes]]] = None,
-) -> str:
+    stream: bool = False,
+) -> Union[str, object]:
     """
     Call Groq LLM API with support for text and images.
+    Now supports streaming responses.
 
     Args:
         model: The model name to use
@@ -46,9 +47,10 @@ def call_groq_llm(
         top_p: Controls diversity via nucleus sampling
         stop: Stop sequence
         images: Optional list of images (URLs, file paths, or base64 encoded data)
+        stream: Whether to stream the response
 
     Returns:
-        The generated response text
+        The generated response text or streaming response object
     """
     # Measure time
     start_time = time.time()
@@ -97,9 +99,13 @@ def call_groq_llm(
         temperature=temperature,
         max_completion_tokens=max_tokens,
         top_p=top_p,
-        stream=False,
+        stream=stream,
         stop=stop,
     )
+
+    # If streaming, return the response object directly
+    if stream:
+        return completion
 
     # Measure time
     end_time = time.time()

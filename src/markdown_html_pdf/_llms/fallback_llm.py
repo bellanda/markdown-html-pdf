@@ -4,6 +4,12 @@ from typing import List, Optional, Union
 from .fireworks import FireworksLLMs, call_fireworks_llm
 from .groq import GroqLLMs, call_groq_llm
 
+fallback_chain = [
+    {"provider": "groq", "model": GroqLLMs.llama_4_maverick_17b_128e_instruct, "name": "Groq Llama4 Maverick"},
+    {"provider": "groq", "model": GroqLLMs.llama_4_scout_17b_16e_instruct, "name": "Groq Llama4 Scout"},
+    {"provider": "fireworks", "model": FireworksLLMs.llama4_maverick_instruct_basic, "name": "Fireworks Llama4 Maverick"},
+]
+
 
 def call_llm_with_fallback(
     prompt: str,
@@ -39,18 +45,6 @@ def call_llm_with_fallback(
         Exception: If all providers/models fail
     """
 
-    # Define the fallback chain
-    fallback_chain = [
-        {"provider": "groq", "model": GroqLLMs.llama_4_scout_17b_16e_instruct, "name": "Groq Llama4 Scout"},
-        {"provider": "groq", "model": GroqLLMs.llama_4_maverick_17b_128e_instruct, "name": "Groq Llama4 Maverick"},
-        {"provider": "fireworks", "model": FireworksLLMs.llama4_scout_instruct_basic, "name": "Fireworks Llama4 Scout"},
-        {
-            "provider": "fireworks",
-            "model": FireworksLLMs.llama4_maverick_instruct_basic,
-            "name": "Fireworks Llama4 Maverick",
-        },
-    ]
-
     last_error = None
 
     for i, fallback in enumerate(fallback_chain):
@@ -80,7 +74,6 @@ def call_llm_with_fallback(
                     top_p=top_p,
                     stop=stop,
                     images=images,
-                    use_sdk=True,
                 )
             else:
                 raise ValueError(f"Unknown provider: {provider}")
@@ -147,18 +140,6 @@ def call_llm_with_fallback_robust(
         Exception: If all providers/models fail
     """
 
-    # Define the fallback chain
-    fallback_chain = [
-        {"provider": "groq", "model": GroqLLMs.llama_4_scout_17b_16e_instruct, "name": "Groq Llama4 Scout"},
-        {"provider": "groq", "model": GroqLLMs.llama_4_maverick_17b_128e_instruct, "name": "Groq Llama4 Maverick"},
-        {"provider": "fireworks", "model": FireworksLLMs.llama4_scout_instruct_basic, "name": "Fireworks Llama4 Scout"},
-        {
-            "provider": "fireworks",
-            "model": FireworksLLMs.llama4_maverick_instruct_basic,
-            "name": "Fireworks Llama4 Maverick",
-        },
-    ]
-
     last_error = None
 
     for i, fallback in enumerate(fallback_chain):
@@ -193,7 +174,6 @@ def call_llm_with_fallback_robust(
                         top_p=top_p,
                         stop=stop,
                         images=images,
-                        use_sdk=True,
                     )
                 else:
                     raise ValueError(f"Unknown provider: {provider}")
