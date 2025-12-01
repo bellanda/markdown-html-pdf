@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "markdown-html-pdf"
-version = "1.0.0"
+version = "2.0.0"
 description = "A powerful Python package to convert Markdown files to PDF with syntax highlighting and emoji support"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -31,11 +31,7 @@ classifiers = [
 ]
 requires-python = ">=3.9"
 dependencies = [
-    "markdown-it-py>=3.0.0",
     "playwright>=1.53.0",
-    "linkify-it-py>=2.0.3",
-    "pygments>=2.18.0",
-    "html2docx>=1.6.0",
     "click>=8.0.0",
     "flask>=3.1.1",
     "pymupdf>=1.26.1",

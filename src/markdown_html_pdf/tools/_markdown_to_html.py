@@ -1,49 +1,11 @@
 """Convert Markdown to HTML with syntax highlighting."""
 
 import pathlib
-import re
 from typing import Union
 
-from markdown_it import MarkdownIt
-from pygments import highlight
-from pygments.formatters import HtmlFormatter
-from pygments.lexers import get_lexer_by_name
-from pygments.util import ClassNotFound
+import requests
 
 from markdown_html_pdf._constants import paths
-
-
-def apply_syntax_highlighting(html_content: str) -> str:
-    """Apply syntax highlighting to code blocks in HTML.
-
-    Args:
-        html_content: HTML content with code blocks to highlight
-
-    Returns:
-        HTML content with syntax highlighting applied
-    """
-    # Regex to find code blocks with specified language
-    code_block_pattern = r'<pre><code class="language-(\w+)">(.*?)</code></pre>'
-
-    def replace_code_block(match: re.Match[str]) -> str:
-        lang = match.group(1)
-        code = match.group(2)
-
-        # Decode HTML entities
-        code = code.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&").replace("&quot;", '"')
-
-        try:
-            lexer = get_lexer_by_name(lang, stripall=True)
-            formatter = HtmlFormatter(cssclass="highlight", style="github-dark", noclasses=False)
-            result = highlight(code, lexer, formatter)
-            return result
-        except ClassNotFound:
-            # If language not recognized, return original code block
-            return match.group(0)
-
-    # Apply the replacement
-    html_content = re.sub(code_block_pattern, replace_code_block, html_content, flags=re.DOTALL)
-    return html_content
 
 
 def markdown_to_html(markdown_text: str, html_output_title: str) -> str:
@@ -56,18 +18,15 @@ def markdown_to_html(markdown_text: str, html_output_title: str) -> str:
     Returns:
         HTML content as string
     """
-    # 1. Render to HTML using markdown-it
-    md = MarkdownIt("gfm-like").enable(["table"])
-    html_body = md.render(markdown_text)
+    # 1. Render to HTML using github API
+    response = requests.post("https://api.github.com/markdown", json={"text": markdown_text})
+    html_body = response.text
 
-    # 2. Apply syntax highlighting to code blocks
-    html_body = apply_syntax_highlighting(html_body)
-
-    # 3. Read the HTML template to render the markdown at github style
+    # 2. Read the HTML template to render the markdown at github style
     with open(paths.HTML_DIR / "template.html", "r", encoding="utf-8") as f:
         html_template = f.read()
 
-    # 4. Replace the placeholders with the actual content
+    # 3. Replace the placeholders with the actual content
     html_template = html_template.replace("||MARKDOWN_TO_BE_RENDERED_HERE||", html_body)
     html_template = html_template.replace("||TITLE_TO_BE_RENDERED_HERE||", html_output_title)
 

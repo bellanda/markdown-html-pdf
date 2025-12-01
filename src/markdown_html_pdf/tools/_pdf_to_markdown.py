@@ -8,7 +8,6 @@ from typing import Any, Dict, List, Tuple
 import fitz
 
 from markdown_html_pdf._constants import paths
-from markdown_html_pdf._llms.fallback_llm import call_llm_with_fallback_robust
 
 
 def extract_page_links(page: fitz.Page) -> List[Dict[str, Any]]:
@@ -369,6 +368,8 @@ def process_page_image(page_data: Tuple[int, bytes, str]) -> Tuple[int, str]:
     Returns:
         Tuple of (page_number, markdown_content)
     """
+    from markdown_html_pdf._llms.fallback_llm import call_llm_with_fallback_robust
+
     page_number, image_bytes, prompt = page_data
 
     try:
